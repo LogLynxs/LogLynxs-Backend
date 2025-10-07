@@ -13,10 +13,11 @@ export const initializeFirebase = (): admin.app.App => {
       const saJson = process.env.FIREBASE_SERVICE_ACCOUNT;
       if (saJson) {
         const parsed = JSON.parse(saJson) as admin.ServiceAccount;
-        firebaseApp = admin.initializeApp({
+        const options: admin.AppOptions = {
           credential: admin.credential.cert(parsed),
-          projectId
-        });
+          ...(projectId ? { projectId } : {})
+        } as admin.AppOptions;
+        firebaseApp = admin.initializeApp(options);
         return firebaseApp;
       }
 
@@ -26,20 +27,22 @@ export const initializeFirebase = (): admin.app.App => {
         try {
           // Try parse as JSON string first
           const parsed = JSON.parse(gac) as admin.ServiceAccount;
-          firebaseApp = admin.initializeApp({
+          const options: admin.AppOptions = {
             credential: admin.credential.cert(parsed),
-            projectId
-          });
+            ...(projectId ? { projectId } : {})
+          } as admin.AppOptions;
+          firebaseApp = admin.initializeApp(options);
           return firebaseApp;
         } catch (_) {
           // If not JSON, try base64 decode -> JSON
           try {
             const decoded = Buffer.from(gac, 'base64').toString('utf8');
             const parsed = JSON.parse(decoded) as admin.ServiceAccount;
-            firebaseApp = admin.initializeApp({
+            const options: admin.AppOptions = {
               credential: admin.credential.cert(parsed),
-              projectId
-            });
+              ...(projectId ? { projectId } : {})
+            } as admin.AppOptions;
+            firebaseApp = admin.initializeApp(options);
             return firebaseApp;
           } catch (_) {
             // If env value is a file path, try reading it
@@ -47,10 +50,11 @@ export const initializeFirebase = (): admin.app.App => {
               if (fs.existsSync(gac)) {
                 const file = fs.readFileSync(gac, 'utf8');
                 const parsed = JSON.parse(file) as admin.ServiceAccount;
-                firebaseApp = admin.initializeApp({
+                const options: admin.AppOptions = {
                   credential: admin.credential.cert(parsed),
-                  projectId
-                });
+                  ...(projectId ? { projectId } : {})
+                } as admin.AppOptions;
+                firebaseApp = admin.initializeApp(options);
                 return firebaseApp;
               }
             } catch (e) {
@@ -62,10 +66,13 @@ export const initializeFirebase = (): admin.app.App => {
       }
 
       // As a last resort, use application default credentials (only works on GCP)
-      firebaseApp = admin.initializeApp({
-        credential: admin.credential.applicationDefault(),
-        projectId
-      });
+      {
+        const options: admin.AppOptions = {
+          credential: admin.credential.applicationDefault(),
+          ...(projectId ? { projectId } : {})
+        } as admin.AppOptions;
+        firebaseApp = admin.initializeApp(options);
+      }
     } catch (error) {
       logger.error('Failed to initialize Firebase Admin SDK:', error);
       throw error;

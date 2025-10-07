@@ -20,37 +20,28 @@ export const logger = createLogger({
     timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     logFormat
   ),
-  transports: (() => {
-    const list: any[] = [];
-    // Always keep console in dev and serverless (no filesystem on Vercel)
-    list.push(
-      new transports.Console({
-        format: combine(
-          colorize(),
-          timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-          logFormat
-        )
-      })
-    );
-
-    // Only add file transports when running on a writable filesystem
-    if (!process.env.VERCEL && process.env.NODE_ENV !== 'production_serverless') {
-      list.push(
-        new transports.File({ filename: 'logs/error.log', level: 'error', maxsize: 5242880, maxFiles: 5 })
-      );
-      list.push(
-        new transports.File({ filename: 'logs/combined.log', maxsize: 5242880, maxFiles: 5 })
-      );
-    }
-    return list;
-  })()
+  transports: [
+    new transports.Console({
+      format: combine(
+        colorize(),
+        timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        logFormat
+      )
+    })
+  ]
 });
 
-// Handle uncaught exceptions
-if (!process.env.VERCEL && process.env.NODE_ENV !== 'production_serverless') {
-  logger.exceptions.handle(new transports.File({ filename: 'logs/exceptions.log' }));
-  logger.rejections.handle(new transports.File({ filename: 'logs/rejections.log' }));
-}
+// Handle uncaught exceptions and rejections to console only (no file writes)
+logger.exceptions.handle(
+  new transports.Console({
+    format: combine(colorize(), timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), logFormat)
+  })
+);
+logger.rejections.handle(
+  new transports.Console({
+    format: combine(colorize(), timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), logFormat)
+  })
+);
 
 
 export default logger;
