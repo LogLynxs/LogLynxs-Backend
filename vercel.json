@@ -1,8 +1,5 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index" },
-    { "source": "/api-docs", "destination": "/api/index" },
-    { "source": "/api-docs.json", "destination": "/api/index" },
     { "source": "/health", "destination": "/api/health" }
   ]
 }
