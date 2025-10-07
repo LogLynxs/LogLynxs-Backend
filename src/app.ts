@@ -104,6 +104,10 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString(), uptime: process.uptime() });
 });
+// Health under API base for mobile testing
+app.get('/api/v1/health', (req, res) => {
+  res.json({ status: 'OK', scope: 'api/v1', timestamp: new Date().toISOString() });
+});
 
 // API Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
