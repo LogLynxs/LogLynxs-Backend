@@ -9,6 +9,11 @@ export default function handler(req: any, res: any) {
   // Handle the route parameters from Vercel's [...route] syntax
   let path = req.url || '/';
   
+  // Clean up any query parameters that Vercel adds
+  if (path.includes('?')) {
+    path = path.split('?')[0];
+  }
+  
   // If we have route parameters, reconstruct the path
   if (req.query && req.query['[...route]']) {
     const routeParams = Array.isArray(req.query['[...route]']) 
@@ -22,7 +27,7 @@ export default function handler(req: any, res: any) {
     path = '/api' + path;
   }
   
-  // Update the request object
+  // Update the request object with clean URL
   req.url = path;
   req.originalUrl = path;
   
