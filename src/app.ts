@@ -21,6 +21,7 @@ import serviceLogRoutes from './modules/serviceLogs/routes';
 import qrCodeRoutes from './modules/qrcodes/routes';
 import stravaRoutes from './modules/strava/routes';
 import notificationRoutes from './modules/notifications/routes';
+import badgeRoutes from './modules/badges/routes';
 
 // Load environment variables
 dotenv.config();
@@ -133,6 +134,8 @@ app.use('/api/v1/service-logs', authMiddleware, serviceLogRoutes);
 app.use('/api/v1/qr-codes', authMiddleware, qrCodeRoutes);
 app.use('/api/v1/strava', authMiddleware, stravaRoutes);
 app.use('/api/v1/notifications', authMiddleware, notificationRoutes);
+app.use('/api/v1/badges', authMiddleware, badgeRoutes);
+app.use('/api/v1/users', authMiddleware, badgeRoutes); // Add badge routes under users
 
 // 404 handler
 app.use('*', (req, res) => {
