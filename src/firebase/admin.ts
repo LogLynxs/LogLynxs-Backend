@@ -12,9 +12,42 @@ export const initializeFirebase = (): admin.app.App => {
       // Preferred: service account JSON provided via env var
       const saJson = process.env.FIREBASE_SERVICE_ACCOUNT;
       if (saJson) {
-        const parsed = JSON.parse(saJson) as admin.ServiceAccount;
+        try {
+          const parsed = JSON.parse(saJson) as admin.ServiceAccount;
+          const options: admin.AppOptions = {
+            credential: admin.credential.cert(parsed),
+            ...(projectId ? { projectId } : {})
+          } as admin.AppOptions;
+          firebaseApp = admin.initializeApp(options);
+          return firebaseApp;
+        } catch (error) {
+          logger.error('Failed to parse FIREBASE_SERVICE_ACCOUNT JSON:', error);
+          // Fall through to try other methods
+        }
+      }
+
+      // Try individual Firebase environment variables
+      const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+      const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+      const privateKeyId = process.env.FIREBASE_PRIVATE_KEY_ID;
+      
+      if (clientEmail && privateKey && privateKeyId) {
+        const serviceAccount = {
+          type: 'service_account',
+          project_id: projectId,
+          private_key_id: privateKeyId,
+          private_key: privateKey,
+          client_email: clientEmail,
+          client_id: process.env.FIREBASE_CLIENT_ID || '',
+          auth_uri: 'https://accounts.google.com/o/oauth2/auth',
+          token_uri: 'https://oauth2.googleapis.com/token',
+          auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
+          client_x509_cert_url: `https://www.googleapis.com/robot/v1/metadata/x509/${encodeURIComponent(clientEmail)}`,
+          universe_domain: 'googleapis.com'
+        } as admin.ServiceAccount;
+        
         const options: admin.AppOptions = {
-          credential: admin.credential.cert(parsed),
+          credential: admin.credential.cert(serviceAccount),
           ...(projectId ? { projectId } : {})
         } as admin.AppOptions;
         firebaseApp = admin.initializeApp(options);
