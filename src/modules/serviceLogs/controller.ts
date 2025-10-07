@@ -7,6 +7,7 @@ import { AuthenticatedRequest } from '../../core/authMiddleware';
 export const serviceLogController = {
   /**
    * Get all service logs for the authenticated user
+   * If bikeId is provided, get service logs for that specific bike (regardless of ownership)
    */
   getServiceLogs: async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -15,7 +16,14 @@ export const serviceLogController = {
       
       logger.info(`Getting service logs for user: ${uid}${bikeId ? `, filtered by bike: ${bikeId}` : ''}`);
       
-      const serviceLogs = await serviceLogService.getServiceLogs(uid, bikeId as string);
+      let serviceLogs;
+      if (bikeId) {
+        // If bikeId is provided, get service logs for that specific bike (public access)
+        serviceLogs = await serviceLogService.getServiceLogsByBikeId(bikeId as string);
+      } else {
+        // If no bikeId, get user's own service logs
+        serviceLogs = await serviceLogService.getServiceLogs(uid);
+      }
       
       res.json({
         success: true,

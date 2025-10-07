@@ -69,6 +69,57 @@ export const componentService = {
   },
 
   /**
+   * Get all components for a specific bike (public access)
+   */
+  async getComponentsByBikeId(bikeId: string): Promise<Component[]> {
+    try {
+      logger.info(`Getting components for bike: ${bikeId}`);
+      
+      // First, get the bike to find the owner
+      const bikeRef = db.collection('bikes').doc(bikeId);
+      const bikeDoc = await bikeRef.get();
+      
+      if (!bikeDoc.exists) {
+        throw new Error('Bike not found');
+      }
+      
+      const bikeData = bikeDoc.data();
+      const ownerUid = bikeData?.ownerUid;
+      
+      if (!ownerUid) {
+        throw new Error('Bike owner not found');
+      }
+      
+      // Get components for this bike
+      const componentsRef = db.collection('components');
+      const query = componentsRef.where('ownerUid', '==', ownerUid).where('currentBikeId', '==', bikeId);
+      const snapshot = await query.get();
+      
+      const components: Component[] = [];
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        components.push({
+          id: doc.id,
+          ownerUid: data.ownerUid,
+          kind: data.kind,
+          brand: data.brand,
+          model: data.model,
+          spec: data.spec,
+          currentBikeId: data.currentBikeId || null,
+          createdAt: data.createdAt.toDate(),
+          updatedAt: data.updatedAt.toDate()
+        });
+      });
+      
+      logger.info(`Found ${components.length} components for bike ${bikeId}`);
+      return components;
+    } catch (error) {
+      logger.error('Error getting components by bike ID:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Get a specific component by ID
    */
   async getComponent(ownerUid: string, componentId: string): Promise<Component | null> {

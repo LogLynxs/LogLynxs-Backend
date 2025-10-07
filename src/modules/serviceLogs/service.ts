@@ -90,6 +90,60 @@ export const serviceLogService = {
   },
 
   /**
+   * Get all service logs for a specific bike (public access)
+   */
+  async getServiceLogsByBikeId(bikeId: string): Promise<ServiceLog[]> {
+    try {
+      logger.info(`Getting service logs for bike: ${bikeId}`);
+      
+      // First, get the bike to find the owner
+      const bikeRef = db.collection('bikes').doc(bikeId);
+      const bikeDoc = await bikeRef.get();
+      
+      if (!bikeDoc.exists) {
+        throw new Error('Bike not found');
+      }
+      
+      const bikeData = bikeDoc.data();
+      const ownerUid = bikeData?.ownerUid;
+      
+      if (!ownerUid) {
+        throw new Error('Bike owner not found');
+      }
+      
+      // Get service logs for this bike
+      const serviceLogsRef = db.collection('service-logs');
+      const snapshot = await serviceLogsRef
+        .where('bikeId', '==', bikeId)
+        .orderBy('performedAt', 'desc')
+        .get();
+      
+      const serviceLogs: ServiceLog[] = [];
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        serviceLogs.push({
+          id: doc.id,
+          bikeId: data.bikeId,
+          performedAt: data.performedAt.toDate(),
+          title: data.title,
+          notes: data.notes,
+          cost: data.cost,
+          mileageAtService: data.mileageAtService,
+          items: data.items || [],
+          createdAt: data.createdAt.toDate(),
+          updatedAt: data.updatedAt.toDate()
+        });
+      });
+      
+      logger.info(`Found ${serviceLogs.length} service logs for bike ${bikeId}`);
+      return serviceLogs;
+    } catch (error) {
+      logger.error('Error getting service logs by bike ID:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Get recent service logs for a user
    */
   async getRecentServiceLogs(ownerUid: string, limit: number): Promise<ServiceLog[]> {

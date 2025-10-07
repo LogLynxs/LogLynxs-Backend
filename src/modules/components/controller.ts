@@ -7,6 +7,7 @@ import { AuthenticatedRequest } from '../../core/authMiddleware';
 export const componentController = {
   /**
    * Get all components for the authenticated user
+   * If bikeId is provided, get components for that specific bike (regardless of ownership)
    */
   getComponents: async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -15,7 +16,14 @@ export const componentController = {
       
       logger.info(`Getting components for user: ${uid}${bikeId ? `, filtered by bike: ${bikeId}` : ''}`);
       
-      const components = await componentService.getComponents(uid, bikeId as string);
+      let components;
+      if (bikeId) {
+        // If bikeId is provided, get components for that specific bike (public access)
+        components = await componentService.getComponentsByBikeId(bikeId as string);
+      } else {
+        // If no bikeId, get user's own components
+        components = await componentService.getComponents(uid);
+      }
       
       res.json({
         success: true,
