@@ -1,9 +1,8 @@
 export default function handler(req: any, res: any) {
   res.status(200).json({ 
-    status: 'OK', 
-    scope: 'api/v1/health',
-    timestamp: new Date().toISOString(),
+    message: 'Test endpoint working',
+    url: req.url,
     method: req.method,
-    url: req.url
+    timestamp: new Date().toISOString()
   });
 }
