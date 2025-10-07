@@ -1,5 +1,4 @@
 import express from 'express';
-import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
@@ -88,12 +87,6 @@ const limiter = rateLimit({
 
 // Middleware
 app.use(helmet());
-app.use(cors({
-  origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [
-    'http://localhost:3000'
-  ],
-  credentials: true
-}));
 app.use(compression());
 app.use(limiter);
 app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
