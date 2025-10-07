@@ -1,15 +1,33 @@
 import app from '../src/app';
 
 export default function handler(req: any, res: any) {
-  // Vercel strips the /api prefix, so we need to add it back for Express routes
-  if (typeof req.url === 'string') {
-    // If the URL doesn't start with /api, add it
-    if (!req.url.startsWith('/api')) {
-      req.url = '/api' + req.url;
-    }
-    // Also update originalUrl for Express
-    req.originalUrl = req.url;
+  // Debug: Log the original request details
+  console.log('Original URL:', req.url);
+  console.log('Original pathname:', req.pathname);
+  console.log('Query params:', req.query);
+  
+  // Handle the route parameters from Vercel's [...route] syntax
+  let path = req.url || '/';
+  
+  // If we have route parameters, reconstruct the path
+  if (req.query && req.query['[...route]']) {
+    const routeParams = Array.isArray(req.query['[...route]']) 
+      ? req.query['[...route]'] 
+      : [req.query['[...route]']];
+    path = '/' + routeParams.join('/');
   }
+  
+  // Clean up the path and add /api prefix
+  if (!path.startsWith('/api')) {
+    path = '/api' + path;
+  }
+  
+  // Update the request object
+  req.url = path;
+  req.originalUrl = path;
+  
+  console.log('Final path:', path);
+  
   return (app as any)(req, res);
 }
 
