@@ -1,0 +1,268 @@
+LogLynx Business API (v1) — Firestore (NoSQL) Integration & Usage Guide
+
+Goal. Keep Firebase for the assignment, but add a clean REST business layer (Node/Express) so Android/Web/iOS call your API, not Firestore directly.
+Store. Firestore (NoSQL) via Firebase Admin SDK.
+Auth. Keep Firebase Auth for sign-in; API exchanges Firebase ID tokens for API JWTs.
+
+
+
+Architecture (NoSQL-first)
+
+Android / Web / iOS
+        │  (HTTP, JSON, JWT)
+        ▼
+   LogLynx REST API (Node/Express, TypeScript recommended)
+        │
+        ├─ Firebase Admin SDK (Auth verify, Firestore reads/writes)
+        └─ Optional workers (cron) for wear calc, Strava sync, reminders
+		
+		
+Why this shape? Meets the requirement to use Firebase while centralizing business logic, validation, and integrations in your API. You can later swap Firestore → Postgres behind the API without client changes.
+
+2) Collections & Data Modeling (Firestore)
+
+Top-level collections with owner fields for easy queries; subcollections for histories. Prefer flat, queryable patterns; keep documents <1 MiB.
+
+Users
+
+users/{uid}
+
+email, displayName, createdAt, lastLoginAt
+
+prefs: { darkMode: bool, notificationsEnabled: bool, biometricsEnabled: bool }
+
+users/{uid}/devices/{token} — Push tokens (FCM), platform, lastSeen.
+
+Bikes
+
+bikes/{bikeId}
+
+ownerUid, name, type, year, status, totalMileage (int), tags (array)
+
+bikes/{bikeId}/service-logs/{logId}
+
+performedAt (timestamp), title, notes, cost, mileageAtService, items (array/map)
+
+Global “service logs” list = collection group query over service-logs.
+
+Components
+
+components/{componentId}
+
+ownerUid, kind (chain/brake/…), brand, model, spec (map), currentBikeId (nullable)
+
+components/{componentId}/installations/{instId}
+
+bikeId, installedAt, installedOdometer, removedAt?, removedOdometer?
+
+components/{componentId}/wear-snapshots/{snapId}
+
+takenAt, mileageAccumulated, wearPct, notes?
+
+QR
+
+qr-codes/{code} (use short slug as doc id)
+
+targetType ('bike'|'component'), targetId, policy ('owner_only'|'any_authenticated'|'shared_list'), ownerUid, expiresAt?
+
+qr-codes/{code}/shared-users/{uid} — membership for shared_list.
+
+Strava & Activities
+
+strava-connections/{uid}
+
+accessToken, refreshToken, expiresAt, athleteId (store securely; consider encryption at rest)
+
+activities/{activityId}
+
+userUid, source ('strava'|'manual'), startedAt, distanceKm, movingTimeSec, bikeId?, raw (map)
+
+Notifications (optional, for audit)
+
+notifications/{id}
+
+userUid, channel, kind, payload, scheduledFor, deliveredAt?
+
+
+3) Indexes (firestore.indexes.json examples)
+
+
+{
+  "indexes": [
+    { "collectionGroup": "service-logs",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "bikeId", "order": "ASCENDING" },
+        { "fieldPath": "performedAt", "order": "DESCENDING" }
+      ]
+    },
+    { "collectionId": "bikes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ownerUid", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    { "collectionId": "components",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ownerUid", "order": "ASCENDING" },
+        { "fieldPath": "kind", "order": "ASCENDING" }
+      ]
+    },
+    { "collectionId": "activities",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userUid", "order": "ASCENDING" },
+        { "fieldPath": "startedAt", "order": "DESCENDING" }
+      ]
+    }
+  ]
+}
+
+
+
+Base path: /api/v1
+
+Auth: /auth/login, /auth/register, /auth/refresh, /auth/logout, /auth/firebase-exchange
+
+Users: /users/profile, /users/preferences
+
+Bikes: /bikes, /bikes/{bikeId}, /bikes/{bikeId}/components, /bikes/{bikeId}/service-logs, /bikes/{bikeId}/qr-code
+
+Components: /components, /components/{id}, /components/{id}/install, /components/{id}/remove, /components/wear-calculations/preview
+
+Service Logs: CRUD
+
+Notifications: subscribe test/delivery endpoints
+
+Strava: /strava/connect, /strava/callback, /strava/sync, /strava/activities
+
+QR Codes: /qr-codes/generate, /qr-codes/scan, /qr-codes/share
+
+Keep the same contracts as your relational design. Only the persistence changes.
+
+
+
+
+
+/src
+  /core        (env, logger, errors, auth middleware)
+  /firebase    (admin init, helpers)
+  /modules
+    /auth
+    /users
+    /bikes
+    /components
+    /serviceLogs
+    /qrcodes
+    /strava
+    /notifications
+    /wear
+  /jobs        (cron tasks)
+  server.ts
+
+
+
+
+PORT=8080
+JWT_SECRET=...
+JWT_REFRESH_SECRET=...
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+FIREBASE_PROJECT_ID=...
+STRAVA_CLIENT_ID=...
+STRAVA_CLIENT_SECRET=...
+STRAVA_REDIRECT_URI=https://api.example.com/api/v1/strava/callback
+
+
+
+
+Strava Integration (server-side OAuth)
+
+GET /strava/connect → redirect user to Strava OAuth with state (user uid + nonce).
+
+GET /strava/callback → exchange code → store tokens in strava-connections/{uid}.
+
+POST /strava/sync → pull activities since last sync; normalize into activities.
+
+Security: Never expose Strava tokens to clients. Consider encrypting token fields before save.
+
+
+
+
+Notifications
+
+Save push token under users/{uid}/devices/{token}.
+
+Nightly job:
+
+scan components for wearPct >= threshold or “due soon,”
+
+create notifications doc (optional),
+
+send FCM directly (server key).
+
+
+
+
+
+12) API Conventions
+
+Auth header: Authorization: Bearer <access_jwt>
+
+Validation: Zod/JSON Schema → 400 with field errors.
+
+Idempotency: Accept Idempotency-Key on POST; store a small record in Firestore (idempotency/{key}) to avoid double-creates.
+
+Pagination: Firestore cursor pattern
+
+orderBy a stable field (name, startedAt), limit, startAfter.
+
+Errors
+
+{ "error": { "code": "RESOURCE_NOT_FOUND", "message": "Component not found" } }
+
+
+
+
+
+Android/Web Integration
+
+Login with Firebase as usual (Google Sign-In supported).
+
+Exchange Firebase ID token → POST /auth/firebase-exchange → receive API {access, refresh}.
+
+Call API endpoints with Authorization: Bearer <access>.
+
+Auto-refresh on 401.
+
+Replace Firestore SDK calls inside the app with Retrofit/Fetch calls to your API.
+
+
+
+
+
+Jobs & Limits (Firestore specifics)
+
+Batch writes: max 500 operations. Chunk long operations.
+
+Transactions: use for state changes (install/remove) and counters.
+
+Hot docs: avoid frequent writes to the same doc (1 write/sec limit).
+
+For counters, prefer FieldValue.increment across sharded docs if needed.
+
+Collection group queries: design with consistent subcollection names (service-logs).
+
+
+
+
+
+
+
+
+6) Security & Rules
+
+Clients should not access Firestore directly → keep Firestore Security Rules restrictive (deny by default).
+
+The server uses Admin SDK (bypasses rules) and enforces authz: compare ownerUid to req.user.uid.

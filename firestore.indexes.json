@@ -1,0 +1,86 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "service-logs",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "bikeId", "order": "ASCENDING" },
+        { "fieldPath": "performedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "service-logs",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "userUid", "order": "ASCENDING" },
+        { "fieldPath": "performedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionId": "bikes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ownerUid", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionId": "bikes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ownerUid", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionId": "components",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ownerUid", "order": "ASCENDING" },
+        { "fieldPath": "kind", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionId": "components",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ownerUid", "order": "ASCENDING" },
+        { "fieldPath": "currentBikeId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionId": "activities",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userUid", "order": "ASCENDING" },
+        { "fieldPath": "startedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionId": "activities",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userUid", "order": "ASCENDING" },
+        { "fieldPath": "bikeId", "order": "ASCENDING" },
+        { "fieldPath": "startedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionId": "notifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userUid", "order": "ASCENDING" },
+        { "fieldPath": "scheduledFor", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionId": "qr-codes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ownerUid", "order": "ASCENDING" },
+        { "fieldPath": "targetType", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

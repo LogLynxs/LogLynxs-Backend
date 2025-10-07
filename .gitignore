@@ -1,0 +1,50 @@
+# Node dependencies
+node_modules/
+
+# Build output
+/dist/
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Firebase & service accounts
+firebase-debug.log
+/.firebase/
+*-firebase-adminsdk-*.json
+*firebase-adminsdk*.json
+*.serviceaccount.json
+
+# Coverage and testing
+coverage/
+.nyc_output/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Editors/IDE
+.vscode/
+.idea/
+
+# Misc
+*.swp
+*.swo
+*.orig

@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow all operations for now (including service account)
+    // This is for development/testing - should be restricted in production
+    match /{document=**} {
+      allow read, write, delete: if true;
+    }
+    
+    // Specific rules for users collection
+    match /users/{userId} {
+      allow read, write, delete: if true;
+    }
+    
+    // Specific rules for other collections
+    match /bikes/{bikeId} {
+      allow read, write, delete: if true;
+    }
+    
+    match /components/{componentId} {
+      allow read, write, delete: if true;
+    }
+    
+    match /refresh_tokens/{tokenId} {
+      allow read, write, delete: if true;
+    }
+  }
+}
