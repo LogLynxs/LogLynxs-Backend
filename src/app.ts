@@ -112,6 +112,21 @@ app.get('/api-docs.json', (req, res) => {
   res.send(swaggerSpec);
 });
 
+// Root route - helpful in serverless envs
+app.get('/', (req, res) => {
+  res.json({
+    name: 'LogLynx API',
+    status: 'OK',
+    routes: {
+      health: '/health',
+      docs: '/api-docs',
+      docsJson: '/api-docs.json',
+      apiBase: '/api/v1'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // API Routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', authMiddleware, userRoutes);
