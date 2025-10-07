@@ -98,6 +98,25 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString(), uptime: process.uptime() });
 });
+// API v1 base route
+app.get('/api/v1', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    scope: 'api/v1', 
+    version: '1.0.0',
+    endpoints: {
+      health: '/api/v1/health',
+      auth: '/api/v1/auth/*',
+      users: '/api/v1/users/*',
+      bikes: '/api/v1/bikes/*',
+      components: '/api/v1/components/*',
+      serviceLogs: '/api/v1/service-logs/*',
+      badges: '/api/v1/badges/*'
+    },
+    timestamp: new Date().toISOString() 
+  });
+});
+
 // Health under API base for mobile testing
 app.get('/api/v1/health', (req, res) => {
   res.json({ status: 'OK', scope: 'api/v1', timestamp: new Date().toISOString() });
