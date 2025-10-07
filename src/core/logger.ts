@@ -20,38 +20,37 @@ export const logger = createLogger({
     timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     logFormat
   ),
-  transports: [
-    // Console transport for development
-    new transports.Console({
-      format: combine(
-        colorize(),
-        timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-        logFormat
-      )
-    }),
-    // File transport for production
-    new transports.File({
-      filename: 'logs/error.log',
-      level: 'error',
-      maxsize: 5242880, // 5MB
-      maxFiles: 5
-    }),
-    new transports.File({
-      filename: 'logs/combined.log',
-      maxsize: 5242880, // 5MB
-      maxFiles: 5
-    })
-  ]
+  transports: (() => {
+    const list: any[] = [];
+    // Always keep console in dev and serverless (no filesystem on Vercel)
+    list.push(
+      new transports.Console({
+        format: combine(
+          colorize(),
+          timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+          logFormat
+        )
+      })
+    );
+
+    // Only add file transports when running on a writable filesystem
+    if (!process.env.VERCEL && process.env.NODE_ENV !== 'production_serverless') {
+      list.push(
+        new transports.File({ filename: 'logs/error.log', level: 'error', maxsize: 5242880, maxFiles: 5 })
+      );
+      list.push(
+        new transports.File({ filename: 'logs/combined.log', maxsize: 5242880, maxFiles: 5 })
+      );
+    }
+    return list;
+  })()
 });
 
 // Handle uncaught exceptions
-logger.exceptions.handle(
-  new transports.File({ filename: 'logs/exceptions.log' })
-);
+if (!process.env.VERCEL && process.env.NODE_ENV !== 'production_serverless') {
+  logger.exceptions.handle(new transports.File({ filename: 'logs/exceptions.log' }));
+  logger.rejections.handle(new transports.File({ filename: 'logs/rejections.log' }));
+}
 
-// Handle unhandled promise rejections
-logger.rejections.handle(
-  new transports.File({ filename: 'logs/rejections.log' })
-);
 
 export default logger;
