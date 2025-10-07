@@ -22,8 +22,9 @@ export default function handler(req: any, res: any) {
     path = '/' + routeParams.join('/');
   }
   
-  // Clean up the path and add /api prefix
-  if (!path.startsWith('/api')) {
+  // Only add /api prefix if the path doesn't already start with /api
+  // and if it's not a root path that should be handled directly
+  if (!path.startsWith('/api') && path !== '/' && path !== '/health' && path !== '/api-docs' && path !== '/api-docs.json') {
     path = '/api' + path;
   }
   
