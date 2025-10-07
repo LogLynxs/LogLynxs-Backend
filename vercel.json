@@ -1,0 +1,10 @@
+{
+  "rewrites": [
+    { "source": "/api/v1/(.*)", "destination": "/api/api/v1/$1" },
+    { "source": "/health", "destination": "/api/health" },
+    { "source": "/api-docs", "destination": "/api/api-docs" },
+    { "source": "/api-docs.json", "destination": "/api/api-docs.json" }
+  ]
+}
+
+
