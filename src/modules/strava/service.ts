@@ -49,7 +49,7 @@ class StravaService {
     if (!this.clientId || !this.clientSecret || !this.redirectUri) {
       logger.warn('Strava configuration incomplete. Please set STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, and STRAVA_REDIRECT_URI in your environment variables.');
     } else {
-      logger.info(`Strava service initialized with Client ID: ${this.clientId.substring(0, 4)}...`);
+      logger.info(`Strava service initialized with Client ID: ${this.clientId.substring(0, 4)}..., Client Secret: ${this.clientSecret.substring(0, 4)}...`);
     }
   }
 
