@@ -32,31 +32,9 @@ const router = Router();
 router.get('/auth-url', stravaController.getAuthUrl);
 
 /**
- * @swagger
- * /api/v1/strava/callback:
- *   get:
- *     summary: Handle Strava OAuth callback
- *     tags: [Strava]
- *     parameters:
- *       - in: query
- *         name: code
- *         required: true
- *         schema:
- *           type: string
- *       - in: query
- *         name: state
- *         required: true
- *         schema:
- *           type: string
- *       - in: query
- *         name: redirect_uri
- *         schema:
- *           type: string
- *     responses:
- *       302:
- *         description: Redirects to app deep link or success page
+ * Note: /callback route is registered separately in app.ts without auth middleware
+ * because Strava redirects there without authentication
  */
-router.get('/callback', stravaController.handleCallback);
 
 /**
  * @swagger

@@ -24,6 +24,7 @@ import componentRoutes from './modules/components/routes';
 import serviceLogRoutes from './modules/serviceLogs/routes';
 import qrCodeRoutes from './modules/qrcodes/routes';
 import stravaRoutes from './modules/strava/routes';
+import { stravaController } from './modules/strava/controller';
 import notificationRoutes from './modules/notifications/routes';
 import badgeRoutes from './modules/badges/routes';
 
@@ -149,12 +150,18 @@ app.get('/', (req, res) => {
 
 // API Routes
 app.use('/api/v1/auth', authRoutes);
+
+// Strava callback must be public (Strava redirects here without auth)
+app.get('/api/v1/strava/callback', stravaController.handleCallback);
+
+// Protected Strava routes (all except callback)
+app.use('/api/v1/strava', authMiddleware, stravaRoutes);
+
 app.use('/api/v1/users', authMiddleware, userRoutes);
 app.use('/api/v1/bikes', authMiddleware, bikeRoutes);
 app.use('/api/v1/components', authMiddleware, componentRoutes);
 app.use('/api/v1/service-logs', authMiddleware, serviceLogRoutes);
 app.use('/api/v1/qr-codes', authMiddleware, qrCodeRoutes);
-app.use('/api/v1/strava', authMiddleware, stravaRoutes);
 app.use('/api/v1/notifications', authMiddleware, notificationRoutes);
 app.use('/api/v1/badges', authMiddleware, badgeRoutes);
 app.use('/api/v1/users', authMiddleware, badgeRoutes); // Add badge routes under users
