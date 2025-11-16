@@ -11,6 +11,7 @@ export interface UserProfile {
     darkMode: 'system' | 'light' | 'dark';
     notificationsEnabled: boolean;
     biometricsEnabled: boolean;
+    stravaAutoSync?: boolean;
   };
 }
 
@@ -40,7 +41,8 @@ export const userService = {
         prefs: {
           darkMode: 'system',
           notificationsEnabled: true,
-          biometricsEnabled: false
+          biometricsEnabled: false,
+          stravaAutoSync: false
         }
       };
       

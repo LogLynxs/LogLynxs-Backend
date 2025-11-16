@@ -65,12 +65,12 @@ export const userController = {
   updatePreferences: async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { uid } = req.user!;
-      const { darkMode, notificationsEnabled, biometricsEnabled } = req.body;
+      const { darkMode, notificationsEnabled, biometricsEnabled, stravaAutoSync } = req.body;
       
       logger.info(`⚙️ Updating preferences for user: ${uid}`);
       
       // Validate input
-      if (!darkMode && notificationsEnabled === undefined && biometricsEnabled === undefined) {
+      if (!darkMode && notificationsEnabled === undefined && biometricsEnabled === undefined && stravaAutoSync === undefined) {
         throw new CustomError('At least one preference must be provided for update', 400, 'INVALID_INPUT');
       }
       
@@ -83,6 +83,7 @@ export const userController = {
       }
       if (notificationsEnabled !== undefined) prefs.notificationsEnabled = notificationsEnabled;
       if (biometricsEnabled !== undefined) prefs.biometricsEnabled = biometricsEnabled;
+      if (stravaAutoSync !== undefined) prefs.stravaAutoSync = stravaAutoSync;
       
       const updatedProfile = await userService.updatePreferences(uid, prefs);
       

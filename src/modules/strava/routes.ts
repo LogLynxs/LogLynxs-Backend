@@ -110,4 +110,44 @@ router.post('/disconnect', stravaController.disconnect);
  */
 router.post('/sync', stravaController.syncActivities);
 
+/**
+ * @swagger
+ * /api/v1/strava/activities:
+ *   get:
+ *     summary: Get all synced Strava activities
+ *     tags: [Strava]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 100
+ *     responses:
+ *       200:
+ *         description: List of synced activities
+ */
+router.get('/activities', stravaController.getActivities);
+
+/**
+ * @swagger
+ * /api/v1/strava/activities/raw:
+ *   get:
+ *     summary: Get raw activities from Strava API (for debugging)
+ *     tags: [Strava]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       200:
+ *         description: Raw Strava API response
+ */
+router.get('/activities/raw', stravaController.getRawActivities);
+
 export default router;

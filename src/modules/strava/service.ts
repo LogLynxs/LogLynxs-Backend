@@ -267,10 +267,21 @@ class StravaService {
       const batch = db.batch();
       const activitiesRef = db.collection('activities');
 
+      logger.info(`Found ${activities.length} activities from Strava API`);
+      
+      // Log activity types for debugging
+      const activityTypes = activities.map(a => a.type);
+      const typeCounts = activityTypes.reduce((acc, type) => {
+        acc[type] = (acc[type] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      logger.info(`Activity types found: ${JSON.stringify(typeCounts)}`);
+
       for (const activity of activities) {
         // Only sync rides
         if (activity.type !== 'Ride') {
           skipped++;
+          logger.debug(`Skipping activity ${activity.id} - type: ${activity.type} (only 'Ride' activities are synced)`);
           continue;
         }
 
@@ -325,6 +336,66 @@ class StravaService {
       return { synced, skipped };
     } catch (error: any) {
       logger.error(`Error syncing activities for user ${uid}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all synced activities for a user
+   */
+  async getSyncedActivities(uid: string, limit: number = 100): Promise<any[]> {
+    try {
+      const activitiesRef = db.collection('activities');
+      const snapshot = await activitiesRef
+        .where('userUid', '==', uid)
+        .where('source', '==', 'strava')
+        .orderBy('startedAt', 'desc')
+        .limit(limit)
+        .get();
+
+      return snapshot.docs.map(doc => {
+        const data = doc.data();
+        // Convert Firestore Timestamps to ISO strings for JSON serialization
+        const result: any = {
+          id: doc.id,
+          ...data
+        };
+        
+        // Convert Timestamps
+        if (data.startedAt && data.startedAt.toDate) {
+          result.startedAt = data.startedAt.toDate().toISOString();
+        }
+        if (data.createdAt && data.createdAt.toDate) {
+          result.createdAt = data.createdAt.toDate().toISOString();
+        }
+        
+        return result;
+      });
+    } catch (error: any) {
+      logger.error(`Error getting synced activities for user ${uid}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get raw activities from Strava API (without syncing)
+   * Useful for debugging and seeing what data is available
+   */
+  async getRawActivities(uid: string, limit: number = 10): Promise<any[]> {
+    try {
+      const accessToken = await this.getValidAccessToken(uid);
+      
+      // Get activities from last 30 days
+      const after = Math.floor((Date.now() - 30 * 24 * 60 * 60 * 1000) / 1000);
+      
+      const activities = await this.getActivities(accessToken, {
+        after: after,
+        perPage: limit
+      });
+
+      return activities;
+    } catch (error: any) {
+      logger.error(`Error getting raw Strava activities for user ${uid}:`, error);
       throw error;
     }
   }

@@ -161,6 +161,51 @@ export const stravaController = {
     } catch (error) {
       next(error);
     }
+  },
+
+  /**
+   * Get all synced activities
+   */
+  getActivities: async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { uid } = req.user!;
+      const limit = parseInt(req.query.limit as string) || 100;
+      
+      const activities = await stravaService.getSyncedActivities(uid, limit);
+
+      res.json({
+        success: true,
+        data: {
+          activities,
+          count: activities.length
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  /**
+   * Get raw activities from Strava API (for debugging)
+   */
+  getRawActivities: async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { uid } = req.user!;
+      const limit = parseInt(req.query.limit as string) || 10;
+      
+      const activities = await stravaService.getRawActivities(uid, limit);
+
+      res.json({
+        success: true,
+        data: {
+          activities,
+          count: activities.length,
+          note: 'This is the raw data from Strava API before processing'
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 };
 
