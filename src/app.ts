@@ -1,3 +1,8 @@
+// Load environment variables FIRST - before any other imports that use env vars
+import dotenv from 'dotenv';
+import { resolve } from 'path';
+dotenv.config({ path: resolve(__dirname, '../.env') });
+
 import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -5,7 +10,6 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
-import dotenv from 'dotenv';
 
 import { errorHandler } from './core/errorHandler';
 import { logger } from './core/logger';
@@ -22,9 +26,6 @@ import qrCodeRoutes from './modules/qrcodes/routes';
 import stravaRoutes from './modules/strava/routes';
 import notificationRoutes from './modules/notifications/routes';
 import badgeRoutes from './modules/badges/routes';
-
-// Load environment variables
-dotenv.config();
 
 const app = express();
 

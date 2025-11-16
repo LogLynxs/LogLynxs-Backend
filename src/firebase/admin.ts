@@ -26,7 +26,7 @@ export const initializeFirebase = (): admin.app.App => {
         }
       }
 
-      // Try base64-encoded JSON in GOOGLE_APPLICATION_CREDENTIALS (most reliable for Railway)
+      // Try GOOGLE_APPLICATION_CREDENTIALS (base64 for Railway, file path for local)
       const gac = process.env.GOOGLE_APPLICATION_CREDENTIALS;
       if (gac) {
         try {
@@ -40,8 +40,22 @@ export const initializeFirebase = (): admin.app.App => {
           firebaseApp = admin.initializeApp(options);
           return firebaseApp;
         } catch (error) {
-          logger.error('Failed to parse base64-encoded GOOGLE_APPLICATION_CREDENTIALS:', error);
-          // Fall through to try other methods
+          // If base64 decode fails, try as file path (local development)
+          try {
+            if (fs.existsSync(gac)) {
+              const fileContent = fs.readFileSync(gac, 'utf8');
+              const parsed = JSON.parse(fileContent) as admin.ServiceAccount;
+              const options: admin.AppOptions = {
+                credential: admin.credential.cert(parsed),
+                ...(projectId ? { projectId } : {})
+              } as admin.AppOptions;
+              firebaseApp = admin.initializeApp(options);
+              return firebaseApp;
+            }
+          } catch (fileError) {
+            logger.error('Failed to parse GOOGLE_APPLICATION_CREDENTIALS as base64 or file path:', fileError);
+            // Fall through to try other methods
+          }
         }
       }
 
