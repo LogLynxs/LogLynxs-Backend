@@ -2,12 +2,39 @@ import { createLogger, format, transports } from 'winston';
 
 const { combine, timestamp, printf, colorize } = format;
 
+// Safe JSON stringify that handles circular references
+const safeStringify = (obj: any, space?: number): string => {
+  const seen = new WeakSet();
+  return JSON.stringify(obj, (key, value) => {
+    // Skip circular references
+    if (typeof value === 'object' && value !== null) {
+      if (seen.has(value)) {
+        return '[Circular]';
+      }
+      seen.add(value);
+    }
+    // Skip functions
+    if (typeof value === 'function') {
+      return '[Function]';
+    }
+    // Skip undefined
+    if (value === undefined) {
+      return undefined;
+    }
+    return value;
+  }, space);
+};
+
 // Custom format for log messages
 const logFormat = printf(({ level, message, timestamp, ...metadata }) => {
   let msg = `${timestamp} [${level}]: ${message}`;
   
   if (Object.keys(metadata).length > 0) {
-    msg += ` ${JSON.stringify(metadata)}`;
+    try {
+      msg += ` ${safeStringify(metadata)}`;
+    } catch (error) {
+      msg += ` [Error stringifying metadata: ${error}]`;
+    }
   }
   
   return msg;
