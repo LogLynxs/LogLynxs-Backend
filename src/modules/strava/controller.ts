@@ -155,7 +155,9 @@ export const stravaController = {
         data: {
           synced: result.synced,
           skipped: result.skipped,
-          message: `Synced ${result.synced} new activities, skipped ${result.skipped} existing activities`
+          mileageUpdated: result.mileageUpdated || 0,
+          bikesCreated: result.bikesCreated || 0,
+          message: `Synced ${result.synced} new activities, skipped ${result.skipped} existing activities${result.bikesCreated ? `, created ${result.bikesCreated} bike(s)` : ''}${result.mileageUpdated ? `, updated mileage for ${result.mileageUpdated} bike(s)` : ''}`
         }
       });
     } catch (error) {
