@@ -362,6 +362,10 @@ class StravaService {
           logger.info(`Imported new Strava bike ${gearId} (${name}) for user ${uid}`);
         } else {
           const doc = existingQuery.docs[0];
+          if (!doc) {
+            logger.warn(`Expected existing Strava bike document but none found for gear ${gearId}`);
+            continue;
+          }
           await doc.ref.update({
             name,
             brand,
