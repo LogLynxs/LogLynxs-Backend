@@ -4,6 +4,7 @@ import { CustomError } from '../../core/errorHandler';
 import { logger } from '../../core/logger';
 import { AuthenticatedRequest } from '../../core/authMiddleware';
 import crypto from 'crypto';
+import { notificationService } from '../notifications/service';
 
 export const stravaController = {
   /**
@@ -150,13 +151,27 @@ export const stravaController = {
       
       const result = await stravaService.syncBikes(uid);
 
+      const summaryMessage = `Imported ${result.imported} Strava bike(s) and updated ${result.updated} existing bike(s)`;
+
       res.json({
         success: true,
         data: {
           imported: result.imported,
           updated: result.updated,
-          message: `Imported ${result.imported} Strava bike(s) and updated ${result.updated} existing bike(s)`
+          message: summaryMessage
         }
+      });
+
+      notificationService.sendNotification(uid, {
+        title: 'Strava Sync Complete',
+        body: summaryMessage,
+        data: {
+          type: 'strava_sync',
+          imported: result.imported.toString(),
+          updated: result.updated.toString()
+        }
+      }).catch(error => {
+        logger.warn(`Failed to send Strava sync notification for ${uid}: ${error}`);
       });
     } catch (error) {
       next(error);
