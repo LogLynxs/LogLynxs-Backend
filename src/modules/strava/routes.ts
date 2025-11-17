@@ -86,13 +86,13 @@ router.post('/disconnect', stravaController.disconnect);
  * @swagger
  * /api/v1/strava/sync:
  *   post:
- *     summary: Sync activities from Strava
+ *     summary: Sync bikes from Strava
  *     tags: [Strava]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Activities synced
+ *         description: Bikes synced
  *         content:
  *           application/json:
  *             schema:
@@ -103,32 +103,12 @@ router.post('/disconnect', stravaController.disconnect);
  *                 data:
  *                   type: object
  *                   properties:
- *                     synced:
+ *                     imported:
  *                       type: number
- *                     skipped:
+ *                     updated:
  *                       type: number
  */
-router.post('/sync', stravaController.syncActivities);
-
-/**
- * @swagger
- * /api/v1/strava/activities:
- *   get:
- *     summary: Get all synced Strava activities
- *     tags: [Strava]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 100
- *     responses:
- *       200:
- *         description: List of synced activities
- */
-router.get('/activities', stravaController.getActivities);
+router.post('/sync', stravaController.syncBikes);
 
 /**
  * @swagger

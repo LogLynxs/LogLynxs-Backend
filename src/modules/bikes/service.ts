@@ -26,6 +26,7 @@ export interface Bike {
   tags: string[];
   uniqueIdentifier: string;
   photoUrl?: string | null;
+  stravaBikeId?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -40,6 +41,7 @@ export interface CreateBikeData {
   tags: string[];
   uniqueIdentifier?: string;
   photoUrl?: string | null;
+  stravaBikeId?: string | null;
 }
 
 export const bikeService = {
@@ -66,6 +68,7 @@ export const bikeService = {
           tags: data.tags || [],
           uniqueIdentifier: data.uniqueIdentifier || '',
         photoUrl: data.photoUrl || null,
+          stravaBikeId: data.stravaBikeId || null,
           createdAt: data.createdAt.toDate(),
           updatedAt: data.updatedAt.toDate()
         });
@@ -110,6 +113,7 @@ export const bikeService = {
         tags: data.tags || [],
         uniqueIdentifier: data.uniqueIdentifier || '',
         photoUrl: data.photoUrl || null,
+        stravaBikeId: data.stravaBikeId || null,
         createdAt: data.createdAt.toDate(),
         updatedAt: data.updatedAt.toDate()
       };
@@ -145,6 +149,7 @@ export const bikeService = {
         tags: bikeData.tags,
         uniqueIdentifier,
         photoUrl: bikeData.photoUrl || null,
+        stravaBikeId: bikeData.stravaBikeId || null,
         createdAt: now,
         updatedAt: now
       };
@@ -188,6 +193,10 @@ export const bikeService = {
         updatedAt: new Date()
       };
       
+      if (updates.stravaBikeId !== undefined) {
+        (updateData as any).stravaBikeId = updates.stravaBikeId;
+      }
+
       await bikeRef.update(updateData);
       
       // Get the updated bike
@@ -206,6 +215,7 @@ export const bikeService = {
         tags: updatedData.tags || [],
         uniqueIdentifier: updatedData.uniqueIdentifier || '',
         photoUrl: updatedData.photoUrl || null,
+        stravaBikeId: updatedData.stravaBikeId || null,
         createdAt: updatedData.createdAt.toDate(),
         updatedAt: updatedData.updatedAt.toDate()
       };
@@ -289,6 +299,7 @@ export const bikeService = {
         tags: updatedData.tags || [],
         uniqueIdentifier: updatedData.uniqueIdentifier || '',
         photoUrl: updatedData.photoUrl || null,
+        stravaBikeId: updatedData.stravaBikeId || null,
         createdAt: updatedData.createdAt.toDate(),
         updatedAt: updatedData.updatedAt.toDate()
       };
@@ -334,6 +345,7 @@ export const bikeService = {
         tags: data.tags || [],
         uniqueIdentifier: data.uniqueIdentifier || '',
         photoUrl: data.photoUrl || null,
+        stravaBikeId: data.stravaBikeId || null,
         createdAt: data.createdAt.toDate(),
         updatedAt: data.updatedAt.toDate()
       };

@@ -140,46 +140,22 @@ export const stravaController = {
   },
 
   /**
-   * Sync activities from Strava
+   * Sync bikes from Strava
    */
-  syncActivities: async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  syncBikes: async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { uid } = req.user!;
       
-      logger.info(`Starting Strava activity sync for user ${uid}`);
+      logger.info(`Starting Strava bike sync for user ${uid}`);
       
-      const result = await stravaService.syncActivities(uid);
+      const result = await stravaService.syncBikes(uid);
 
       res.json({
         success: true,
         data: {
-          synced: result.synced,
-          skipped: result.skipped,
-          mileageUpdated: result.mileageUpdated || 0,
-          bikesCreated: result.bikesCreated || 0,
-          message: `Synced ${result.synced} new activities, skipped ${result.skipped} existing activities${result.bikesCreated ? `, created ${result.bikesCreated} bike(s)` : ''}${result.mileageUpdated ? `, updated mileage for ${result.mileageUpdated} bike(s)` : ''}`
-        }
-      });
-    } catch (error) {
-      next(error);
-    }
-  },
-
-  /**
-   * Get all synced activities
-   */
-  getActivities: async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const { uid } = req.user!;
-      const limit = parseInt(req.query.limit as string) || 100;
-      
-      const activities = await stravaService.getSyncedActivities(uid, limit);
-
-      res.json({
-        success: true,
-        data: {
-          activities,
-          count: activities.length
+          imported: result.imported,
+          updated: result.updated,
+          message: `Imported ${result.imported} Strava bike(s) and updated ${result.updated} existing bike(s)`
         }
       });
     } catch (error) {

@@ -136,7 +136,7 @@ Service Logs: CRUD
 
 Notifications: subscribe test/delivery endpoints
 
-Strava: /strava/connect, /strava/callback, /strava/sync, /strava/activities
+Strava: /strava/connect, /strava/callback, /strava/sync
 
 QR Codes: /qr-codes/generate, /qr-codes/scan, /qr-codes/share
 
