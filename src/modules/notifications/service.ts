@@ -55,17 +55,24 @@ export const notificationService = {
         notification: {
           title: payload.title,
           body: payload.body
-        },
-        data: payload.data
+        }
       };
+
+      if (payload.data) {
+        message.data = payload.data;
+      }
 
       const response = await admin.messaging().sendEachForMulticast(message);
       response.responses.forEach((resp, index) => {
         if (!resp.success) {
           const errorCode = resp.error?.code || '';
           if (errorCode.includes('not-registered') || errorCode.includes('invalid-registration-token')) {
-            tokensCollection.doc(tokens[index]).delete().catch(err => {
-              logger.error(`Failed to delete invalid token ${tokens[index]}:`, err);
+            const token = tokens[index];
+            if (!token) {
+              return;
+            }
+            tokensCollection.doc(token).delete().catch(err => {
+              logger.error(`Failed to delete invalid token ${token}:`, err);
             });
           }
         }
