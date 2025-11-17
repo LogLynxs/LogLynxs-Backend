@@ -203,11 +203,12 @@ export const badgeService = {
    */
   getUserBadge: async (uid: string, badgeId: string): Promise<UserBadge | null> => {
     try {
-      logger.info(`🏆 Getting badge ${badgeId} for user: ${uid}`);
+      const normalizedId = normalizeBadgeId(badgeId);
+      logger.info(`🏆 Getting badge ${badgeId} (normalized: ${normalizedId}) for user: ${uid}`);
       
       const badgeRef = db.collection('user_badges')
         .where('uid', '==', uid)
-        .where('badgeId', '==', badgeId);
+        .where('badgeId', '==', normalizedId);
       const snapshot = await badgeRef.get();
       
       if (snapshot.empty) {
