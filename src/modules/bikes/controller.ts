@@ -65,7 +65,7 @@ export const bikeController = {
       logger.info(`Request body type:`, typeof req.body);
       logger.info(`Request body keys:`, Object.keys(req.body || {}));
       
-      const { name, brand, type, year, status, totalMileage, tags } = req.body;
+      const { name, brand, type, year, status, totalMileage, tags, photoUrl } = req.body;
       
       logger.info(`Received bike data:`, { name, brand, type, year, status, totalMileage, tags });
       
@@ -88,7 +88,8 @@ export const bikeController = {
         year,
         status,
         totalMileage,
-        tags: tags || []
+        tags: tags || [],
+        photoUrl: photoUrl || null
       });
       
       res.status(201).json({
@@ -107,7 +108,7 @@ export const bikeController = {
     try {
       const { uid } = req.user!;
       const { bikeId } = req.params;
-      const { name, brand, type, year, status, totalMileage, tags } = req.body;
+      const { name, brand, type, year, status, totalMileage, tags, photoUrl } = req.body;
       
       logger.info(`Updating bike ${bikeId} for user: ${uid}`);
       
@@ -127,6 +128,7 @@ export const bikeController = {
       if (status !== undefined) updates.status = status;
       if (totalMileage !== undefined) updates.totalMileage = totalMileage;
       if (tags !== undefined) updates.tags = tags;
+      if (photoUrl !== undefined) updates.photoUrl = photoUrl;
       
       if (!bikeId) {
         throw new CustomError('Bike ID is required', 400, 'INVALID_INPUT');

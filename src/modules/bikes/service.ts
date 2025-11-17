@@ -25,6 +25,7 @@ export interface Bike {
   totalMileage: number;
   tags: string[];
   uniqueIdentifier: string;
+  photoUrl?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -38,6 +39,7 @@ export interface CreateBikeData {
   totalMileage: number;
   tags: string[];
   uniqueIdentifier?: string;
+  photoUrl?: string | null;
 }
 
 export const bikeService = {
@@ -63,6 +65,7 @@ export const bikeService = {
           totalMileage: data.totalMileage,
           tags: data.tags || [],
           uniqueIdentifier: data.uniqueIdentifier || '',
+        photoUrl: data.photoUrl || null,
           createdAt: data.createdAt.toDate(),
           updatedAt: data.updatedAt.toDate()
         });
@@ -106,6 +109,7 @@ export const bikeService = {
         totalMileage: data.totalMileage,
         tags: data.tags || [],
         uniqueIdentifier: data.uniqueIdentifier || '',
+        photoUrl: data.photoUrl || null,
         createdAt: data.createdAt.toDate(),
         updatedAt: data.updatedAt.toDate()
       };
@@ -140,6 +144,7 @@ export const bikeService = {
         totalMileage: bikeData.totalMileage,
         tags: bikeData.tags,
         uniqueIdentifier,
+        photoUrl: bikeData.photoUrl || null,
         createdAt: now,
         updatedAt: now
       };
@@ -200,6 +205,7 @@ export const bikeService = {
         totalMileage: updatedData.totalMileage,
         tags: updatedData.tags || [],
         uniqueIdentifier: updatedData.uniqueIdentifier || '',
+        photoUrl: updatedData.photoUrl || null,
         createdAt: updatedData.createdAt.toDate(),
         updatedAt: updatedData.updatedAt.toDate()
       };
@@ -282,6 +288,7 @@ export const bikeService = {
         totalMileage: updatedData.totalMileage,
         tags: updatedData.tags || [],
         uniqueIdentifier: updatedData.uniqueIdentifier || '',
+        photoUrl: updatedData.photoUrl || null,
         createdAt: updatedData.createdAt.toDate(),
         updatedAt: updatedData.updatedAt.toDate()
       };
@@ -326,6 +333,7 @@ export const bikeService = {
         totalMileage: data.totalMileage,
         tags: data.tags || [],
         uniqueIdentifier: data.uniqueIdentifier || '',
+        photoUrl: data.photoUrl || null,
         createdAt: data.createdAt.toDate(),
         updatedAt: data.updatedAt.toDate()
       };
